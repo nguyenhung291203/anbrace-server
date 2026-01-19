@@ -28,22 +28,12 @@ export type Category = Prisma.CategoryModel
  */
 export type Product = Prisma.ProductModel
 /**
- * Model User
+ * Model Account
  * 
  */
-export type User = Prisma.UserModel
+export type Account = Prisma.AccountModel
 /**
  * Model Token
  * 
  */
 export type Token = Prisma.TokenModel
-/**
- * Model Cart
- * 
- */
-export type Cart = Prisma.CartModel
-/**
- * Model CartItem
- * 
- */
-export type CartItem = Prisma.CartItemModel

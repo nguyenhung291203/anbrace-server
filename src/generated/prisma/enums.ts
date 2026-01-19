@@ -9,6 +9,24 @@
 * 🟢 You can import this file directly.
 */
 
+export const Gender = {
+  MALE: 'MALE',
+  FEMALE: 'FEMALE',
+  OTHER: 'OTHER'
+} as const
+
+export type Gender = (typeof Gender)[keyof typeof Gender]
+
+
+export const Role = {
+  CLIENT: 'CLIENT',
+  ADMIN: 'ADMIN',
+  EMPLOYEE: 'EMPLOYEE'
+} as const
+
+export type Role = (typeof Role)[keyof typeof Role]
+
+
 export const TokenType = {
   REFRESH: 'REFRESH',
   ACCESS: 'ACCESS'
