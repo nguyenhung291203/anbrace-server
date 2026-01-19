@@ -13,7 +13,7 @@ export class AuthService {
 		private readonly tokenService: TokenService,
 	) {}
 	async register(dto: RegisterReqDto) {
-		const existed = await this.prismaService.user.findUnique({
+		const existed = await this.prismaService.account.findUnique({
 			where: { email: dto.email },
 		})
 
@@ -25,7 +25,7 @@ export class AuthService {
 
 		const hashed = await this.hashingService.hash(dto.password)
 
-		await this.prismaService.user.create({
+		await this.prismaService.account.create({
 			data: {
 				email: dto.email,
 				fullName: dto.fullName,
@@ -34,7 +34,7 @@ export class AuthService {
 		})
 	}
 	async login(req: LoginReqDto): Promise<LoginResDto> {
-		const user = await this.prismaService.user.findUnique({
+		const user = await this.prismaService.account.findUnique({
 			where: { email: req.email },
 		})
 
@@ -54,7 +54,7 @@ export class AuthService {
 
 		await this.prismaService.token.create({
 			data: {
-				userId: user.id,
+				accountId: user.id,
 				type: 'REFRESH',
 				token: tokens.refreshToken,
 				expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -72,7 +72,7 @@ export class AuthService {
 	}
 
 	async getMe(userId: number) {
-		const user = await this.prismaService.user.findUnique({
+		const user = await this.prismaService.account.findUnique({
 			where: { id: userId },
 			select: {
 				id: true,
