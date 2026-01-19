@@ -16,7 +16,7 @@ import { ZodBody } from 'src/shared/decorators/zod-schema.decorator'
 import { CategoryQuerySchema, CreateCategorySchema, UpdateCategorySchema } from './category.schema'
 import type { CategoryQueryDto, CreateCategoryDto, UpdateCategoryDto } from './category.dto'
 
-@Controller('categories')
+@Controller('api/v1/categories')
 export class CategoryController {
 	constructor(private readonly categoryService: CategoryService) {}
 

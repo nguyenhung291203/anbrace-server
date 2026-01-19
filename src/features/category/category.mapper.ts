@@ -7,7 +7,6 @@ export class CategoryMapper {
 			id: category.id,
 			name: category.name,
 			description: category.description,
-			imageUrl: category.imageUrl,
 		}
 	}
 
@@ -15,23 +14,17 @@ export class CategoryMapper {
 		return categories.map((category) => this.toResponse(category))
 	}
 
-	static toCreateInput(
-		dto: CreateCategoryDto,
-	): Pick<Category, 'name' | 'description' | 'imageUrl'> {
+	static toCreateInput(dto: CreateCategoryDto): Pick<Category, 'name' | 'description'> {
 		return {
 			name: dto.name,
 			description: dto.description || null,
-			imageUrl: dto.imageUrl || null,
 		}
 	}
 
-	static toUpdateInput(
-		dto: UpdateCategoryDto,
-	): Partial<Pick<Category, 'name' | 'description' | 'imageUrl'>> {
+	static toUpdateInput(dto: UpdateCategoryDto): Partial<Pick<Category, 'name' | 'description'>> {
 		return {
 			...(dto.name !== undefined && { name: dto.name }),
 			...(dto.description !== undefined && { description: dto.description }),
-			...(dto.imageUrl !== undefined && { imageUrl: dto.imageUrl }),
 		}
 	}
 }

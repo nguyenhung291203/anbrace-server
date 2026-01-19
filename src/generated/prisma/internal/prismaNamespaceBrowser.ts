@@ -77,7 +77,6 @@ export const CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  imageUrl: 'imageUrl',
   createdAt: 'createdAt',
   createdBy: 'createdBy',
   updatedAt: 'updatedAt',
