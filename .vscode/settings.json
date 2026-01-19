@@ -1,0 +1,40 @@
+{
+  // ===== Format on save =====
+  "editor.formatOnSave": true,
+
+  // ===== Prettier là formatter mặc định =====
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // ===== TAB thay vì SPACE =====
+  "editor.insertSpaces": false,
+  "editor.detectIndentation": false,
+  "editor.tabSize": 2,
+
+  // ===== Áp dụng cho từng loại file =====
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // ===== Prisma format =====
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma",
+    "editor.formatOnSave": true
+  },
+
+  // ===== ESLint auto fix (logic, không format) =====
+  "editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit"
+	},
+
+  // ===== Line ending =====
+  "files.eol": "\n"
+}
