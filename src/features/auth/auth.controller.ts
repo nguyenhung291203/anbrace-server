@@ -10,7 +10,7 @@ import { AuthenticationGuard } from 'src/shared/guards/authentication.guard'
 import { AuthType, ConditionGuard } from 'src/shared/constants/auth.constant'
 import { Auth } from 'src/shared/decorators/auth.decorator'
 
-@Controller('auth')
+@Controller('api/v1/auth')
 export class AuthController {
 	constructor(private readonly authService: AuthService) {}
 	@Post('register')

@@ -9,21 +9,47 @@ import { InvalidException, NotFoundException } from 'src/shared/exceptions/api.e
 export class CategoryService {
 	constructor(private readonly prisma: PrismaService) {}
 
-	private static readonly ERROR = {
-		NOT_FOUND: 'Không tìm thấy danh mục',
-		NAME_DUPLICATED: 'Tên danh mục đã tồn tại',
-	}
-	private static readonly FIELD_ERROR = {
-		NAME_DUPLICATE: {
-			name: 'DUPLICATE',
-		},
-	}
-
 	async create(dto: CreateCategoryDto) {
-		await this.assertNameNotDuplicated(dto.name)
+		const existed = await this.prisma.category.findFirst({
+			where: {
+				name: dto.name,
+			},
+			select: { id: true },
+		})
+
+		if (existed) {
+			throw new InvalidException('Tên danh mục đã tồn tại', {
+				name: 'Tên danh mục đã tồn tại',
+			})
+		}
 
 		await this.prisma.category.create({
 			data: CategoryMapper.toCreateInput(dto),
+		})
+	}
+
+	async update(id: number, dto: UpdateCategoryDto) {
+		const existing = await this.findExistingCategory(id)
+
+		if (dto.name && dto.name !== existing.name) {
+			const duplicated = await this.prisma.category.findFirst({
+				where: {
+					name: dto.name,
+					NOT: { id },
+				},
+				select: { id: true },
+			})
+
+			if (duplicated) {
+				throw new InvalidException('Tên danh mục đã tồn tại', {
+					name: 'Tên danh mục đã tồn tại',
+				})
+			}
+		}
+
+		await this.prisma.category.update({
+			where: { id },
+			data: CategoryMapper.toUpdateInput(dto),
 		})
 	}
 
@@ -79,21 +105,6 @@ export class CategoryService {
 		return CategoryMapper.toResponse(category)
 	}
 
-	async update(id: number, dto: UpdateCategoryDto) {
-		const existing = await this.findExistingCategory(id)
-
-		if (dto.name && dto.name !== existing.name) {
-			await this.assertNameNotDuplicated(dto.name, id)
-		}
-
-		const updated = await this.prisma.category.update({
-			where: { id },
-			data: CategoryMapper.toUpdateInput(dto),
-		})
-
-		return CategoryMapper.toResponse(updated)
-	}
-
 	async delete(id: number, deletedBy?: number) {
 		await this.findExistingCategory(id)
 
@@ -113,28 +124,9 @@ export class CategoryService {
 		})
 
 		if (!category) {
-			throw new NotFoundException(CategoryService.ERROR.NOT_FOUND)
+			throw new NotFoundException('Danh mục không tồn tại')
 		}
 
 		return category
-	}
-
-	private async assertNameNotDuplicated(name: string, excludeId?: number) {
-		const duplicated = await this.prisma.category.findFirst({
-			where: {
-				name,
-				isDeleted: false,
-				...(excludeId && {
-					NOT: { id: excludeId },
-				}),
-			},
-		})
-
-		if (duplicated) {
-			throw new InvalidException(
-				CategoryService.ERROR.NAME_DUPLICATED,
-				CategoryService.FIELD_ERROR.NAME_DUPLICATE,
-			)
-		}
 	}
 }

@@ -5,10 +5,10 @@ import {
 	Param,
 	ParseIntPipe,
 	Post,
-	Put,
 	Delete,
 	HttpCode,
 	HttpStatus,
+	Patch,
 } from '@nestjs/common'
 import { ApiResponse } from 'src/shared/dtos/api.dto'
 import { CategoryService } from './category.service'
@@ -37,18 +37,18 @@ export class CategoryController {
 	@Post()
 	@HttpCode(HttpStatus.OK)
 	async create(@ZodBody(CreateCategorySchema) dto: CreateCategoryDto) {
-		const data = await this.categoryService.create(dto)
-		return ApiResponse.success(data)
+		await this.categoryService.create(dto)
+		return ApiResponse.success('Category created')
 	}
 
-	@Put(':id')
+	@Patch(':id')
 	@HttpCode(HttpStatus.OK)
 	async update(
 		@Param('id', ParseIntPipe) id: number,
 		@ZodBody(UpdateCategorySchema) dto: UpdateCategoryDto,
 	) {
-		const data = await this.categoryService.update(id, dto)
-		return ApiResponse.success(data)
+		await this.categoryService.update(id, dto)
+		return ApiResponse.success('Category updated')
 	}
 
 	@Delete(':id')
