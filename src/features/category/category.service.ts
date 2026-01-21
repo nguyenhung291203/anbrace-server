@@ -10,10 +10,9 @@ export class CategoryService {
 	constructor(private readonly prisma: PrismaService) {}
 
 	private static readonly ERROR = {
-		NOT_FOUND: 'Category not found',
-		NAME_DUPLICATED: 'Category name already exists',
+		NOT_FOUND: 'Không tìm thấy danh mục',
+		NAME_DUPLICATED: 'Tên danh mục đã tồn tại',
 	}
-
 	private static readonly FIELD_ERROR = {
 		NAME_DUPLICATE: {
 			name: 'DUPLICATE',
@@ -23,11 +22,9 @@ export class CategoryService {
 	async create(dto: CreateCategoryDto) {
 		await this.assertNameNotDuplicated(dto.name)
 
-		const category = await this.prisma.category.create({
+		await this.prisma.category.create({
 			data: CategoryMapper.toCreateInput(dto),
 		})
-
-		return CategoryMapper.toResponse(category)
 	}
 
 	async findAll(query: CategoryQueryDto) {
@@ -53,12 +50,24 @@ export class CategoryService {
 				skip: (pageNo - 1) * pageSize,
 				take: pageSize,
 				orderBy,
+				include: {
+					_count: {
+						select: {
+							products: true,
+						},
+					},
+				},
 			}),
 			this.prisma.category.count({ where }),
 		])
 
 		return new PaginationResponse(
-			CategoryMapper.toResponseList(items),
+			items.map((item) => {
+				return {
+					...CategoryMapper.toResponse(item),
+					productQuantity: item._count.products,
+				}
+			}),
 			pageNo,
 			pageSize,
 			totalRecords,
