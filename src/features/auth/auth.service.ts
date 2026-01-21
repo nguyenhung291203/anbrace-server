@@ -55,7 +55,7 @@ export class AuthService {
 			})
 		}
 
-		const tokens = this.generateTokens({ userId: user.id })
+		const tokens = this.generateTokens({ userId: user.id, role: user.role })
 
 		await this.prismaService.token.create({
 			data: {
@@ -69,7 +69,7 @@ export class AuthService {
 		return tokens
 	}
 
-	private generateTokens(payload: { userId: number }): LoginResDto {
+	private generateTokens(payload: { userId: number; role: string }): LoginResDto {
 		return {
 			accessToken: this.tokenService.signAccessToken(payload),
 			refreshToken: this.tokenService.signRefreshToken(payload),

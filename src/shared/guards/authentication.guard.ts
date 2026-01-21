@@ -1,10 +1,23 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common'
+import {
+	Injectable,
+	CanActivate,
+	ExecutionContext,
+	UnauthorizedException,
+	ForbiddenException,
+} from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { Observable, lastValueFrom } from 'rxjs'
 import { AccessTokenGuard } from 'src/shared/guards/acces-token.guard'
 import { APIKeyGuard } from './api-key.guard'
 import { AUTH_TYPE_KEY } from '../decorators/auth.decorator'
-import { AuthType, AuthTypeDecoratorPayload, ConditionGuard } from '../constants/auth.constant'
+import {
+	AuthType,
+	AuthTypeDecoratorPayload,
+	ConditionGuard,
+	REQUEST_USER_KEY,
+} from '../constants/auth.constant'
+import { ROLES_KEY } from '../decorators/role.decorator'
+import { TokenPayload } from '../types/jwt.type'
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
@@ -37,13 +50,38 @@ export class AuthenticationGuard implements CanActivate {
 		const condition = authConfig.options?.condition ?? ConditionGuard.And
 		const guards = authConfig.authTypes.map((item) => this.guardMap[item])
 
+		let authenticated = false
+
 		if (condition === ConditionGuard.Or) {
-			return this.handleOrCondition(guards, context)
+			authenticated = await this.handleOrCondition(guards, context)
+		} else {
+			authenticated = await this.handleAndCondition(guards, context)
 		}
 
-		return this.handleAndCondition(guards, context)
+		this.checkRoles(context)
+
+		return authenticated
 	}
 
+	private checkRoles(context: ExecutionContext) {
+		const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
+			context.getHandler(),
+			context.getClass(),
+		])
+
+		if (!requiredRoles || requiredRoles.length === 0) {
+			return
+		}
+
+		const request = context.switchToHttp().getRequest()
+		const user = request[REQUEST_USER_KEY] as TokenPayload
+
+		if (!user || !requiredRoles.includes(user.role)) {
+			throw new ForbiddenException('Không có quyền truy cập')
+		}
+	}
+
+	// ================== AUTH HANDLING ==================
 	private async handleOrCondition(
 		guards: CanActivate[],
 		context: ExecutionContext,

@@ -9,12 +9,18 @@ import {
 	HttpCode,
 	HttpStatus,
 	Patch,
+	UseGuards,
 } from '@nestjs/common'
 import { ApiResponse } from 'src/shared/dtos/api.dto'
 import { CategoryService } from './category.service'
 import { ZodBody } from 'src/shared/decorators/zod-schema.decorator'
 import { CategoryQuerySchema, CreateCategorySchema, UpdateCategorySchema } from './category.schema'
 import type { CategoryQueryDto, CreateCategoryDto, UpdateCategoryDto } from './category.dto'
+import { AuthenticationGuard } from 'src/shared/guards/authentication.guard'
+import { Auth } from 'src/shared/decorators/auth.decorator'
+import { AuthType } from 'src/shared/constants/auth.constant'
+import { Roles } from 'src/shared/decorators/role.decorator'
+import { RoleEnum } from '../auth/auth.types'
 
 @Controller('api/v1/categories')
 export class CategoryController {
@@ -36,6 +42,9 @@ export class CategoryController {
 
 	@Post()
 	@HttpCode(HttpStatus.OK)
+	@UseGuards(AuthenticationGuard)
+	@Roles(RoleEnum.ADMIN, RoleEnum.EMPLOYEE)
+	@Auth([AuthType.Bearer])
 	async create(@ZodBody(CreateCategorySchema) dto: CreateCategoryDto) {
 		await this.categoryService.create(dto)
 		return ApiResponse.success('Category created')
@@ -43,6 +52,9 @@ export class CategoryController {
 
 	@Patch(':id')
 	@HttpCode(HttpStatus.OK)
+	@UseGuards(AuthenticationGuard)
+	@Roles(RoleEnum.ADMIN, RoleEnum.EMPLOYEE)
+	@Auth([AuthType.Bearer])
 	async update(
 		@Param('id', ParseIntPipe) id: number,
 		@ZodBody(UpdateCategorySchema) dto: UpdateCategoryDto,
@@ -53,6 +65,9 @@ export class CategoryController {
 
 	@Delete(':id')
 	@HttpCode(HttpStatus.OK)
+	@UseGuards(AuthenticationGuard)
+	@Roles(RoleEnum.ADMIN, RoleEnum.EMPLOYEE)
+	@Auth([AuthType.Bearer])
 	async delete(@Param('id', ParseIntPipe) id: number) {
 		await this.categoryService.delete(id)
 		return ApiResponse.successMessage('Category deleted')
