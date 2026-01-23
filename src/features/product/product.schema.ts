@@ -55,6 +55,7 @@ export const UpdateProductSchema = z.object({
 export const ProductQuerySchema = PaginationRequestSchema.extend({
 	keyword: z.string().optional(),
 	categoryIds: z.array(z.number()).optional(),
+	sizes: z.array(z.number()).optional(),
 	minPrice: z.coerce.number().nonnegative('minPrice không được nhỏ hơn 0').optional(),
 	maxPrice: z.coerce.number().nonnegative('maxPrice không được nhỏ hơn 0').optional(),
 })

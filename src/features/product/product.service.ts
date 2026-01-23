@@ -78,12 +78,12 @@ export class ProductService {
 	 * Get list product (pagination + filter)
 	 */
 	async findAll(query: ProductQueryDto) {
-		const { pageNo, pageSize, keyword, orders, categoryIds, minPrice, maxPrice } = query
+		const { pageNo, pageSize, keyword, orders, categoryIds, minPrice, maxPrice, sizes } = query
 
 		const where: any = {
 			isDeleted: false,
 			...(keyword && {
-				name: { contains: keyword },
+				name: { contains: keyword, mode: 'insensitive' },
 			}),
 			...(categoryIds?.length && {
 				categoryId: { in: categoryIds },
@@ -97,36 +97,31 @@ export class ProductService {
 					}))
 				: [{ createdAt: SortOrder.DESC }]
 
-		const [items, totalRecords] = await this.prisma.$transaction([
-			this.prisma.product.findMany({
-				where,
-				skip: (pageNo - 1) * pageSize,
-				take: pageSize,
-				orderBy,
-				include: {
-					category: true,
-				},
-			}),
-			this.prisma.product.count({ where }),
-		])
+		const items = await this.prisma.product.findMany({
+			where,
+			orderBy,
+			include: { category: true },
+		})
 
-		const filteredItems =
-			minPrice !== undefined || maxPrice !== undefined
-				? items.filter((product) => {
-						const sizes = product.sizes as {
-							price: number
-						}[]
+		const filteredItems = items.filter((product) => {
+			const productSizes = product.sizes as {
+				price: number
+				size: number
+			}[]
 
-						return sizes.some((s) => {
-							if (minPrice !== undefined && s.price < minPrice) return false
-							if (maxPrice !== undefined && s.price > maxPrice) return false
-							return true
-						})
-					})
-				: items
+			return productSizes.some((s) => {
+				if (minPrice !== undefined && s.price < minPrice) return false
+				if (maxPrice !== undefined && s.price > maxPrice) return false
+				if (sizes?.length && !sizes.includes(s.size)) return false
+				return true
+			})
+		})
+
+		const totalRecords = filteredItems.length
+		const pagedItems = filteredItems.slice((pageNo - 1) * pageSize, pageNo * pageSize)
 
 		return new PaginationResponse(
-			filteredItems.map((item) => ProductMapper.toResponse(item)),
+			pagedItems.map((item) => ProductMapper.toResponse(item)),
 			pageNo,
 			pageSize,
 			totalRecords,
