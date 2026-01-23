@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { AccessTokenGuard } from './guards/acces-token.guard'
 import { APIKeyGuard } from './guards/api-key.guard'
 import { AuthenticationGuard } from './guards/authentication.guard'
+import { UploadService } from './services/upload.service'
 
 const shared = [
 	PrismaService,
@@ -14,6 +15,7 @@ const shared = [
 	AccessTokenGuard,
 	APIKeyGuard,
 	AuthenticationGuard,
+	UploadService,
 ]
 @Global()
 @Module({
