@@ -7,7 +7,7 @@ import { ApiResponse } from 'src/shared/dtos/api.dto'
 import { ActiveUser } from 'src/shared/decorators/active-user.decorator'
 import type { TokenPayload } from 'src/shared/types/jwt.type'
 import { AuthenticationGuard } from 'src/shared/guards/authentication.guard'
-import { AuthType, ConditionGuard } from 'src/shared/constants/auth.constant'
+import { AuthType } from 'src/shared/constants/auth.constant'
 import { Auth } from 'src/shared/decorators/auth.decorator'
 
 @Controller('api/v1/auth')
@@ -29,10 +29,19 @@ export class AuthController {
 
 	@Get('me')
 	@UseGuards(AuthenticationGuard)
-	@Auth([AuthType.Bearer], { condition: ConditionGuard.And })
+	@Auth([AuthType.Bearer])
 	async me(@ActiveUser() user: TokenPayload) {
 		console.log('User in me endpoint:', user)
 		const res = await this.authService.getMe(user.userId)
 		return ApiResponse.success(res, 'User info retrieved successfully')
+	}
+
+	@Post('logout')
+	@HttpCode(HttpStatus.OK)
+	@UseGuards(AuthenticationGuard)
+	@Auth([AuthType.Bearer])
+	async logout(@ActiveUser() user: TokenPayload) {
+		await this.authService.logout(user.userId)
+		return ApiResponse.success(null, 'Logout successful')
 	}
 }

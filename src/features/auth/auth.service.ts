@@ -44,7 +44,10 @@ export class AuthService {
 		})
 
 		if (!user) {
-			throw new UnauthorizedException()
+			throw new InvalidException('Thông tin đăng nhập không hợp lệ', {
+				password: 'Email hoặc mật khẩu không đúng',
+				email: 'Email hoặc mật khẩu không đúng',
+			})
 		}
 
 		const isPasswordValid = await this.hashingService.compare(req.password, user.password)
@@ -83,6 +86,9 @@ export class AuthService {
 				id: true,
 				email: true,
 				fullName: true,
+				phoneNumber: true,
+				gender: true,
+				role: true,
 			},
 		})
 
@@ -91,5 +97,13 @@ export class AuthService {
 		}
 
 		return user
+	}
+
+	async logout(userId: number) {
+		await this.prismaService.token.deleteMany({
+			where: {
+				accountId: userId,
+			},
+		})
 	}
 }
